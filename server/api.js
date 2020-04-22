@@ -9,7 +9,9 @@
 
 var express=require('express');
 let mysql = require('mysql');
+const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser'); //allows us to get passed in api calls easily
+const saltRounds = 10;
 var app=express();
 
 // get config
@@ -50,40 +52,63 @@ router.get("/",function(req,res){
 });
 
 // GET - read data from database, return status code 200 if successful
-router.get("/api/restaurants",function(req,res){
+router.get("/api/healthinspectors",function(req,res){
 	// get all restaurants (limited to first 10 here), return status code 200
-	global.connection.query('SELECT * FROM nyc_inspections.Restaurants LIMIT 10', function (error, results, fields) {
+	global.connection.query('SELECT * FROM nyc_inspections.HealthInspectors LIMIT 10', function (error, results, fields) {
 		if (error) throw error;
 		res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
 	});
 });
 
-router.get("/api/restaurants/:id",function(req,res){
+router.get("/api/healthinspectors/:user",function(req,res){
 	console.log(req.params.id);
 	//read a single restaurant with RestauantID = req.params.id (the :id in the url above), return status code 200 if successful, 404 if not
-	global.connection.query('SELECT * FROM nyc_inspections.Restaurants WHERE RestaurantID = ?', [req.params.id],function (error, results, fields) {
+	global.connection.query('SELECT * FROM nyc_inspections.HealthInspectors WHERE Username = ?', [req.params.user],function (error, results, fields) {
 		if (error) throw error;
 		res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
 	});
 });
 
 // PUT - UPDATE data in database, make sure to get the ID of the row to update from URL route, return status code 200 if successful
-router.put("/api/restaurants/:id",function(req,res){
+router.put("/api/healthinspectors/:user",function(req,res){
 	console.log(req.body);
-	res.send(JSON.stringify({"status": 200, "error": null, "response": "here on a put -- update restaurant with RestaurantID=" + req.params.id}));
+	global.connection.query("UPDATE nyc_inspections.HealthInspectors SET HireDate = "+req.body.HireDate+", Salary = "+req.body.Salary+", AdminPrivileges = "+req.body.AdminPrivileges+" WHERE Username = ?", [req.params.user],function (error, results, fields) {
+		if (error) throw error;
+		res.send(JSON.stringify({"status": 200, "error": null, "response": "here on a put -- update inspector with Username=" + req.params.user}));
+	});
 });
 
+async function passHash(pass) {
+
+	const hashedPassword = await new Promise((resolve, reject) => {
+		bcrypt.hash(pass, saltRounds, function(err, hash) {
+		  if (err) reject(err)
+		  resolve(hash)
+		});
+	  })
+
+	return hashedPassword;
+  }
+
 // POST -- create new restaurant, return location of new restaurant in location header, return status code 200 if successful
-router.post("/api/restaurants",function(req,res){
+router.post("/api/healthinspectors", function(req,res){
 	console.log(req.body);
-	res.send(JSON.stringify({"status": 201, "error": null, 
-		"Location":"/api/restaurants/id of new restaurant here",
-		"response": "here on a post -- create a new restaurant for " + req.body.RestaurantName + " in " +req.body.Boro}));
+	
+	const pwd = passHash(req.body.password)
+
+	console.log(hash);
+	global.connection.query("INSERT INTO HealthInspectors (HireDate, Salary, AdminPrivileges, Username, Password) VALUES ("+req.body.HireDate+","+req.body.Salary+","+req.body.AdminPrivileges+","+req.body.Username+","+pwd+")", [req.params.id],function (error, results, fields) {
+		if (error) throw error;
+		res.send(JSON.stringify({"yay": "success!"}));
+	});
 });
 
 // DELETE -- delete restaurant with RestaurantID of :id, return status code 200 if successful
-router.delete("/api/restaurants/:id",function(req,res){
-	res.send(JSON.stringify({"status": 200, "error": null, "response": "here on a delete -- remove restaurant with RestaurantID=" + req.params.id}));
+router.delete("/api/healthinspectors/:user",function(req,res){
+	global.connection.query("DELETE FROM nyc_inspections.HealthInspectors WHERE Username= ?", [req.params.user],function (error, results, fields) {
+		if (error) throw error;
+		res.send(JSON.stringify({"status": 200, "error": null, "response": "here on a delete -- remove restaurant with Username=" + req.params.user}));
+	});
 });
 
 
