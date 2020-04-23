@@ -80,7 +80,7 @@ router.post("/api/healthinspectors", function(req,res){
 	console.log(hash);
 	global.connection.query("INSERT INTO HealthInspectors (HireDate, Salary, AdminPrivileges, Username, Password) VALUES ("+req.body.HireDate+","+req.body.Salary+","+req.body.AdminPrivileges+","+req.body.Username+", '"+hash+"' )", [req.params.id],function (error, results, fields) {
 		if (error) throw error;
-		res.send(JSON.stringify({"yay": "success!"}));
+		res.send(JSON.stringify({"status": 201, "error": null, "response": "here on a post -- added inspector with Username=" + req.body.Username}));
 	});
 	
 
