@@ -75,10 +75,12 @@ if __name__ == '__main__':
 			print("Making a get (read) call to restaurants")
 			make_get_call('http://localhost:3000/api/healthinspectors/')
 		if command == "2":
+			print("please tell us the user you would like to get")
 			userid = input()
 			print("\nMaking a get (read) call to a specific employee (username=" + userid + ")")
 			make_get_call('http://localhost:3000/api/healthinspectors/' + userid)
 		if command == "3":
+			print("please tell us the name of the user you would like to delete")
 			userid = input()
 			print("\nMaking a delete call to HealthInspectors")
 			make_delete_call('http://localhost:3000/api/healthinspectors/' + userid)
