@@ -11,9 +11,9 @@ Based on: https://dev.mysql.com/doc/connector-python/en/connector-python-example
 Usage: python call_api.py 
 '''
 
-def make_get_call(url):
+def make_get_call(url,user,pwd):
 	#make get call to url
-	resp = requests.get(url)
+	resp = requests.get(url, user, pwd)
 	#expecting to get a status of 200 on success
 	if resp.json()['status'] != 200:
 		# This means something went wrong.
@@ -25,9 +25,9 @@ def make_get_call(url):
 	for user in resp.json()['response']:
 		print(user["HireDate"], user["Salary"], user["AdminPrivileges"], user["Username"], user["Password"])
 
-def make_post_call(url, data):
+def make_post_call(user,pwd,url,data):
 	#make post call to url passing it data
-	resp = requests.post(url, json=data)
+	resp = requests.post(user, pwd, url, json=data)
 	#expecting to get a status of 201 on success
 	if resp.json()['status'] != 201:
 		print('Something went wrong {}'.format(resp.status_code))
@@ -35,9 +35,9 @@ def make_post_call(url, data):
 	print('post succeeded')
 	print(resp.json())
 
-def make_put_call(url,data):
+def make_put_call(user,pwd,url,data):
 	#make post call to url passing it data
-	resp = requests.put(url, json=data)
+	resp = requests.put(user, pwd, url, json=data)
 	#expecting to get a status of 200 on success
 	if resp.json()['status'] != 200:
 		print('Something went wrong {}'.format(resp.status_code))
@@ -45,9 +45,9 @@ def make_put_call(url,data):
 	print('put succeeded')
 	print(resp.json())
 
-def make_delete_call(url):
+def make_delete_call(user,pwd,url):
 	#make post call to url passing it data
-	resp = requests.delete(url)
+	resp = requests.delete(user, pwd, url)
 	#expecting to get a status of 200 on success
 	if resp.json()['status'] != 200:
 		print('Something went wrong {}'.format(resp.status_code))
@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
 
 
-
+	
 	'''
 	#make a get call
 	print("Making a get (read) call to restaurants")

@@ -44,17 +44,34 @@ router.get("/",function(req,res){
 	res.send("Yo!  This my API.  Call it right, or don't call it at all!");
 });
 
-// GET - read data from database, return status code 200 if successful
-router.get("/api/healthinspectors",function(req,res){
-	// get all instructors (limited to first 10 here), return status code 200
-	global.connection.query('SELECT * FROM nyc_inspections.HealthInspectors LIMIT 10', function (error, results, fields) {
+function checkCredentials(user, pass) {
+	let hash = global.connection.query('SELECT Password FROM nyc_inspections.HealthInspectors WHERE Username = ?', [req.params.user],function (error, results, fields) {
 		if (error) throw error;
-		res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		console.log("password retrieved");
 	});
+	if(bcrypt.compareSync(pass, hash)) {
+		return true;
+	   } else {
+		return false;
+	   };
+};
+
+// GET - read data from database, return status code 200 if successful
+router.get("/api/healthinspectors",function(user,pass,req,res){
+	if (checkCredentials(user, pass)) {
+		// get all instructors (limited to first 10 here), return status code 200
+		global.connection.query('SELECT * FROM nyc_inspections.HealthInspectors LIMIT 10', function (error, results, fields) {
+			if (error) throw error;
+			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+		});
+	} else {
+		res.send("Yo!  This my API.  Get your password right, or don't call it at all!");
+	}
+	
 });
 
-router.get("/api/healthinspectors/:user",function(req,res){
-	console.log(req.params.id);
+router.get("/api/healthinspectors/:user",function(user,pass,req,res){
+	//funciton to check username and password
 	//read a single inspector with username = req.params.user (the :user in the url above), return status code 200 if successful, 404 if not
 	global.connection.query('SELECT * FROM nyc_inspections.HealthInspectors WHERE Username = ?', [req.params.user],function (error, results, fields) {
 		if (error) throw error;
@@ -63,7 +80,7 @@ router.get("/api/healthinspectors/:user",function(req,res){
 });
 
 // PUT - UPDATE data in database, make sure to get the user of the row to update from URL route, return status code 200 if successful
-router.put("/api/healthinspectors/:user",function(req,res){
+router.put("/api/healthinspectors/:user",function(user,pass,req,res){
 	console.log(req.body);
 	global.connection.query("UPDATE nyc_inspections.HealthInspectors SET HireDate = "+req.body.HireDate+", Salary = "+req.body.Salary+", AdminPrivileges = "+req.body.AdminPrivileges+" WHERE Username = ?", [req.params.user],function (error, results, fields) {
 		if (error) throw error;
@@ -72,7 +89,7 @@ router.put("/api/healthinspectors/:user",function(req,res){
 });
 
 // POST -- create new inspector, return status code 200 if successful
-router.post("/api/healthinspectors", function(req,res){
+router.post("/api/healthinspectors", function(user,pass,req,res){
 	console.log(req.body);
 
 	// synchronous
@@ -88,7 +105,7 @@ router.post("/api/healthinspectors", function(req,res){
 });
 
 // DELETE -- delete inspector with inspectorID of :user, return status code 200 if successful
-router.delete("/api/healthinspectors/:user",function(req,res){
+router.delete("/api/healthinspectors/:user",function(user,pass,req,res){
 	global.connection.query("DELETE FROM nyc_inspections.HealthInspectors WHERE Username= ?", [req.params.user],function (error, results, fields) {
 		if (error) throw error;
 		res.send(JSON.stringify({"status": 200, "error": null, "response": "here on a delete -- remove restaurant with Username=" + req.params.user}));
