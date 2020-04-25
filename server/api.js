@@ -47,34 +47,41 @@ function checkCredentials(user, pass) {
 	//something = "'" + user + "'"
 	global.connection.query("SELECT Password FROM nyc_inspections.HealthInspectors WHERE Username ='" + user + "'",function (error, hash, fields) {
 		if (error) throw error;
-		console.log(hash)
-		console.log(JSON.stringify(hash[0].Password));
-		var hashed = JSON.stringify(hash[0].Password);
+		hash=hash[0].Password;
+		theresponse = bcrypt.compareSync(pass, hash);
+		console.log(theresponse);
+		return theresponse;
+		//console.log(hash)
+		//console.log(JSON.stringify(hash[0].Password));
+		//var hashed = JSON.stringify(hash[0].Password);
 		//const newhash = JSON.parse(hashed)
-		var other = "$2b$10$gP2bqHiI3Fyy9YZyOJ/3G.aVF5RfWFkddcJ0Jm5.0BonkccdpjvAa";
-		if(bcrypt.compareSync(pass, other)) {
-			console.log("password matches");
-			return true;
-		} 
-		else {
-			console.log("password does not match");
-			return false;
-		};
+		//var other = "$2b$10$gP2bqHiI3Fyy9YZyOJ/3G.aVF5RfWFkddcJ0Jm5.0BonkccdpjvAa";
+		//if(bcrypt.compareSync(pass, hash)) {
+		//	console.log("password matches");
+		//	return true;
+		//} 
+		//else {
+		//	console.log("password does not match");
+		//	return false;
+		//};
 	});
 };
+
 
 // GET - read data from database, return status code 200 if successful
 router.get("/api/healthinspectors",function(req,res){
 	
-	if (checkCredentials(req.body.user, req.body.pwd)) {
+	if (checkCredentials(req.body.user, req.body.pwd) === true) {
+		console.log("entered");
 		// get all instructors (limited to first 10 here), return status code 200
 		global.connection.query('SELECT * FROM nyc_inspections.HealthInspectors LIMIT 10', function (error, results, fields) {
+			console.log("print something!!")
 			if (error) throw error;
 			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
 		});
-	} else {
+	//} else {
 		//console.log("what's going on with this")
-		res.send(JSON.stringify({"status": 201, "error" : "you used the wrong credentials", "response" : "try logging in again"}));
+	//	res.send(JSON.stringify({"status": 205, "error" : "you used the wrong credentials", "response" : "try logging in again"}));
 	}
 	
 });
