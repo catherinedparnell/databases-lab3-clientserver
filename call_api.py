@@ -11,23 +11,25 @@ Based on: https://dev.mysql.com/doc/connector-python/en/connector-python-example
 Usage: python call_api.py 
 '''
 
-def make_get_call(url,user,pwd):
+def make_get_call(url,user):
 	#make get call to url
-	resp = requests.get(url, user, pwd)
+	print(user)
+	resp = requests.get(url, json=user)
 	#expecting to get a status of 200 on success
 	if resp.json()['status'] != 200:
 		# This means something went wrong.
 		print('Something went wrong {}'.format(resp.status_code))
-		exit()
+		
 
 	#print data returned
-	print("get succeeded")
-	for user in resp.json()['response']:
-		print(user["HireDate"], user["Salary"], user["AdminPrivileges"], user["Username"], user["Password"])
+	else:
+		print("get succeeded")
+		for user in resp.json()['response']:
+			print(user["HireDate"], user["Salary"], user["AdminPrivileges"], user["Username"], user["Password"])
 
-def make_post_call(user,pwd,url,data):
+def make_post_call(url,data):
 	#make post call to url passing it data
-	resp = requests.post(user, pwd, url, json=data)
+	resp = requests.post(url, json=data)
 	#expecting to get a status of 201 on success
 	if resp.json()['status'] != 201:
 		print('Something went wrong {}'.format(resp.status_code))
@@ -35,9 +37,9 @@ def make_post_call(user,pwd,url,data):
 	print('post succeeded')
 	print(resp.json())
 
-def make_put_call(user,pwd,url,data):
+def make_put_call(url,data):
 	#make post call to url passing it data
-	resp = requests.put(user, pwd, url, json=data)
+	resp = requests.put(url, json=data)
 	#expecting to get a status of 200 on success
 	if resp.json()['status'] != 200:
 		print('Something went wrong {}'.format(resp.status_code))
@@ -45,9 +47,9 @@ def make_put_call(user,pwd,url,data):
 	print('put succeeded')
 	print(resp.json())
 
-def make_delete_call(user,pwd,url):
+def make_delete_call(url):
 	#make post call to url passing it data
-	resp = requests.delete(user, pwd, url)
+	resp = requests.delete(url)
 	#expecting to get a status of 200 on success
 	if resp.json()['status'] != 200:
 		print('Something went wrong {}'.format(resp.status_code))
@@ -72,13 +74,24 @@ if __name__ == '__main__':
 			print("quitting program")
 			running = False
 		if command == "1":
+			print("what is your username?")
+			username = input()
+			print("what is your password?")
+			password = input()
 			print("Making a get (read) call to restaurants")
-			make_get_call('http://localhost:3000/api/healthinspectors/')
+			credentials = {"user": username, "pwd": password}
+			make_get_call('http://localhost:3000/api/healthinspectors/', credentials)
 		if command == "2":
+			print("what is your username?")
+			username = input()
+			print("what is your password?")
+			password = input()
+			print("Making a get (read) call to restaurants")
+			credentials = {"user": username, "pwd": password}
 			print("please tell us the user you would like to get")
 			userid = input()
 			print("\nMaking a get (read) call to a specific employee (username=" + userid + ")")
-			make_get_call('http://localhost:3000/api/healthinspectors/' + userid)
+			make_get_call('http://localhost:3000/api/healthinspectors/' + userid, credentials)
 		if command == "3":
 			print("please tell us the name of the user you would like to delete")
 			userid = input()
