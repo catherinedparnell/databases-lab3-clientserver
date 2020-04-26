@@ -47,10 +47,15 @@ function checkCredentials(user, pass) {
 	//something = "'" + user + "'"
 	global.connection.query("SELECT Password FROM nyc_inspections.HealthInspectors WHERE Username ='" + user + "'",function (error, hash, fields) {
 		if (error) throw error;
-		hash=hash[0].Password;
-		theresponse = bcrypt.compareSync(pass, hash);
-		console.log(theresponse);
-		return theresponse;
+		if (typeof hash[0] !== 'undefined'){
+			hash=hash[0].Password;
+			theresponse = bcrypt.compareSync(pass, hash);
+			console.log(theresponse);
+			return theresponse;
+		}
+		else {
+			return false;
+		}
 		//console.log(hash)
 		//console.log(JSON.stringify(hash[0].Password));
 		//var hashed = JSON.stringify(hash[0].Password);
@@ -70,19 +75,32 @@ function checkCredentials(user, pass) {
 
 // GET - read data from database, return status code 200 if successful
 router.get("/api/healthinspectors",function(req,res){
+	global.connection.query("SELECT Password FROM nyc_inspections.HealthInspectors WHERE Username ='" + req.body.user + "'",function (error, hash, fields) {
+		if (error) throw error;
+		if (typeof hash[0] !== 'undefined'){
+			hash=hash[0].Password;
+			let theresponse = bcrypt.compareSync(req.body.pwd, hash);
+			console.log(theresponse);
 	
-	if (checkCredentials(req.body.user, req.body.pwd) === true) {
-		console.log("entered");
+	
+	//resp = checkCredentials(req.body.user, req.body.pwd);
+	//console.log(resp);
+			if (theresponse === true) {
+				global.connection.query("SELECT AdminPrivileges FROM nyc_inspections.HealthInspectors WHERE Username ='" + req.body.user + "'",function (error, privileges, fields) {
+					console.log(privileges[0].AdminPrivileges);
+				
+					//if (checkCredentials(req.body.user, req.body.pwd) === true) {
 		// get all instructors (limited to first 10 here), return status code 200
-		global.connection.query('SELECT * FROM nyc_inspections.HealthInspectors LIMIT 10', function (error, results, fields) {
-			console.log("print something!!")
-			if (error) throw error;
-			res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
-		});
-	//} else {
-		//console.log("what's going on with this")
-	//	res.send(JSON.stringify({"status": 205, "error" : "you used the wrong credentials", "response" : "try logging in again"}));
+				global.connection.query('SELECT * FROM nyc_inspections.HealthInspectors LIMIT 10', function (error, results, fields) {
+					if (error) throw error;
+					res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+				});
+			});
+			} else {
+				res.send(JSON.stringify({"status": 201, "error" : "you used the wrong credentials", "response" : "try logging in again"}));
 	}
+}
+});
 	
 });
 

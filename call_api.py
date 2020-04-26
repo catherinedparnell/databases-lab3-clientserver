@@ -14,13 +14,12 @@ Usage: python call_api.py
 def make_get_call(url,user):
 	#make get call to url
 	resp = requests.get(url, json=user)
-	print(resp)
 	#expecting to get a status of 200 on success
-	if resp.json()['status'] != 201:
+	if resp.json()['status'] != 200:
 		# This means something went wrong.
 		print('Something went wrong {}'.format(resp.status_code))
+		exit()
 		
-
 	#print data returned
 	else:
 		print("get succeeded")
