@@ -17,8 +17,9 @@ def make_get_call(url,user):
 	#expecting to get a status of 200 on success
 	if resp.json()['status'] != 200:
 		# This means something went wrong.
-		print('Something went wrong {}'.format(resp.status_code))
-		exit()
+		print('get unsuccessful')
+		print(resp.json())
+		
 		
 	#print data returned
 	else:
@@ -31,30 +32,33 @@ def make_post_call(url,data):
 	resp = requests.post(url, json=data)
 	#expecting to get a status of 201 on success
 	if resp.json()['status'] != 201:
-		print('Something went wrong {}'.format(resp.status_code))
-		exit()
-	print('post succeeded')
-	print(resp.json())
+		print('post unsuccessful')
+		print(resp.json())
+	else:
+		print('post succeeded')
+		print(resp.json())
 
 def make_put_call(url,data):
 	#make post call to url passing it data
 	resp = requests.put(url, json=data)
 	#expecting to get a status of 200 on success
 	if resp.json()['status'] != 200:
-		print('Something went wrong {}'.format(resp.status_code))
-		exit()
-	print('put succeeded')
-	print(resp.json())
+		print("put unsuccessful")
+		print(resp.json())
+	else:	
+		print('put succeeded')
+		print(resp.json())
 
-def make_delete_call(url):
+def make_delete_call(url, data):
 	#make post call to url passing it data
-	resp = requests.delete(url)
+	resp = requests.delete(url, json=data)
 	#expecting to get a status of 200 on success
 	if resp.json()['status'] != 200:
-		print('Something went wrong {}'.format(resp.status_code))
-		exit()
-	print('delete succeeded')
-	print(resp.json())
+		print('delete unsuccessful')
+		print(resp.json())
+	else:	
+		print('delete succeeded')
+		print(resp.json())
 
 
 
@@ -92,11 +96,21 @@ if __name__ == '__main__':
 			print("\nMaking a get (read) call to a specific employee (username=" + userid + ")")
 			make_get_call('http://localhost:3000/api/healthinspectors/' + userid, credentials)
 		if command == "3":
+			print("what is your username?")
+			username = input()
+			print("what is your password?")
+			password = input()
+			print("Making a get (read) call to restaurants")
+			credentials = {"user": username, "pwd": password}
 			print("please tell us the name of the user you would like to delete")
 			userid = input()
 			print("\nMaking a delete call to HealthInspectors")
-			make_delete_call('http://localhost:3000/api/healthinspectors/' + userid)
+			make_delete_call('http://localhost:3000/api/healthinspectors/' + userid, credentials)
 		if command == "4":
+			print("what is your username?")
+			username = input()
+			print("what is your password?")
+			password = input()
 			print("plase tell us your parameters in the following comma separated form")
 			print("HireDate (in the form YYYY-MM-DD), Salary, AdminPrivileges (0 or 1), Username, Password")
 			newuser = input()
@@ -108,10 +122,14 @@ if __name__ == '__main__':
 				
 			print("\nMaking a post (create) call")
 			user_data = {"HireDate": "'" + formatted[0] + "'", "Salary": str(formatted[1]), "AdminPrivileges": str(formatted[2]),
-	 		"Username": "'" + formatted[3] + "'", "Password": str(formatted[4]) }
+	 		"Username": "'" + formatted[3] + "'", "Password": str(formatted[4]), "user": username, "pwd": password}
 			make_post_call('http://localhost:3000/api/healthinspectors/',user_data)
 			
 		if command == '5':
+			print("what is your username?")
+			username = input()
+			print("what is your password?")
+			password = input()
 			print("please tell us the user that you would like to update")
 			tochange = input()
 			print("now could you give us what you would like the entry to be changed to in the following form")
@@ -125,7 +143,7 @@ if __name__ == '__main__':
 
 			print("\nMaking a put (update) call")
 			user_data = {"HireDate": "'" + formatted[0] + "'", "Salary": str(formatted[1]), "AdminPrivileges": str(formatted[2]),
-			"Username": "'" + formatted[3] + "'", "Password": str(formatted[4]) }
+			"Username": "'" + formatted[3] + "'", "Password": str(formatted[4]), "user": username, "pwd": password }
 			make_put_call('http://localhost:3000/api/healthinspectors/'+ tochange,user_data)
 
 
